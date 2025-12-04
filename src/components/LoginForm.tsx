@@ -42,7 +42,7 @@ const LoginForm = () => {
           <div
             style={{
               minHeight: "540px",
-                position: "relative",
+              position: "relative",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -76,27 +76,26 @@ const LoginForm = () => {
                 lineHeight: "22px",
               }}
             >
-            {/* Loader overlay shown while submitting */}
-            {isSubmitting && (
-              <div
-                style={{
-                  position: "absolute",
-                  inset: 0,
-                  background: "rgba(255,255,255,0.85)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  zIndex: 50,
-                }}
-              >
-                <div aria-hidden="true">
-                  <div className="loader" />
+              {/* Loader overlay shown while submitting */}
+              {isSubmitting && (
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: "rgba(255,255,255,0.85)",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 50,
+                  }}
+                >
+                  <div aria-hidden="true">
+                    <div className="loader" />
+                  </div>
                 </div>
-              </div>
-            )}
-
-            {/* Loader CSS */}
-            <style>{`
+              )}
+              {/* Loader CSS */}
+              <style>{`
 .loader {
   width: 60px;
   aspect-ratio: 4;
